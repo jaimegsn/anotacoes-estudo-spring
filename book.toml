@@ -1,0 +1,6 @@
+[book]
+authors = ["jaimegsn"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Spring Framework"

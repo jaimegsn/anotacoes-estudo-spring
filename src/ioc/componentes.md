@@ -1,0 +1,3 @@
+# Componentes Spring
+
+Lembrando que injeção de dependências no Spring só funciona em componentes Spring e as classes que são componentes precisam ser registrados como tais para que o framework possa gerenciar as dependências delas, ou seja objetos que possui uma determinada annotation como: **@Component**, **@Service**, **@Repository, @Controller, @RestController, @Configuration, @Bean e etc...** são registradas como componentes para o framework Spring.
