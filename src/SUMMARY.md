@@ -54,6 +54,8 @@
   - [Data Transfer Object (DTO)](./design-patterns/dto.md)
     - [Na Mão](./design-patterns/dto/na-mao.md)
     - [Map Struct](./design-patterns/dto/mapStruct.md)
+      - [Conversões Complexas](./design-patterns/dto/conversoesComplexasComMapStruct.md)
+      - [Conversões Complexas com MapStruct na Prática](./design-patterns/dto/conversoesComplexasMapStructNaPratica.md)
 - [Versionamento da API](./versionamento-api.md)
 - [Content Negotiation(API em XML, YAML.. e Internacionalização)](./content-negotiations.md)
   - [Preferência do cliente no formato do conteúdo](./content-negotiations/preferencia-cliente.md)
