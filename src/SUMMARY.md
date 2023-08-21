@@ -67,3 +67,6 @@
 - [Documentação da API com Swagger](./open-swagger.md)
   - [Limitando endpoints na documentação do Swagger e Redefinindo URL de acesso ao Swagger UI](./open-swagger/limitando-apis-e-redefinindo-url.md)
   - [Customizando o Swagger](./open-swagger/customizando-swagger.md)
+- [CORS e Same-Origin](./cors.md)
+  - [Implementando o CORS no Controller](./cors/implementando_cors_controller.md)
+  - [Implementando o CORS Globalmente](./cors/implementando_cors_global.md)
