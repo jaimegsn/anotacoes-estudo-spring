@@ -79,6 +79,8 @@
   - [JWT (JASON WEB TOKEN)](./spring-security/jwt.md)
   - [JWT vs Token Opaco](./spring-security/jwt-vs-token-opaco.md)
   - [Spring Security V6](./spring-security/spring-security-v6/spring-security-v6.md)
+    - [Visão geral/arquitetura Spring Security 6](./spring-security/spring-security-v6/visao-geral-arquitetura-spring-security-v6.md)
+    - [JwtService](./spring-security/spring-security-v6/jwt-service.md)
     - [Personalizando Autenticação Básica](./spring-security/spring-security-v6/personalizando-autenticacao-basica.md)
     - [Autorização no nivel de operação](./spring-security/spring-security-v6/protecao-nivel-operador.md)
     - [Acessar informações do usuário autenticado](./spring-security/spring-security-v6/acessar-informacoes-user-autenticado.md)
