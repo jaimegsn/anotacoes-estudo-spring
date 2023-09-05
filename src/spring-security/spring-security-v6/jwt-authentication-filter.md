@@ -1,17 +1,16 @@
 # JwtAuthenticationFilter
 
-Após termos criado o JwtService iremos criar o filtro **`JwtAuthenticationFilter`** que irá chamar a validação feita no JwtService, para validar o token.
-Até porque JwtService não têm acesso a request e response, quem tem acesso a isso são os filtros.
+Após termos criado o JwtService iremos criar o filtro **`JwtAuthenticationFilter`**, onde sua função será realizar verificações no token para valida-lo, inclusive essas avaliações incluem utilizar métoddos de JwtService.
 
 **`JwtAuthenticationFilter`** será uma classe que irá estender a classe abstrata **`OncePerRequestFilter`** do Spring, essa classe foi criada com o objetivo de facilitar a criação de filtros que devem ser executados uma única vez para cada solicitação HTTP, garantindo que essas operações não sejam repetidas, mesmo que haja múltiplos filtros na cadeia de filtros.
 
-A classe OncePerRequestFilter possui um único método abstrato chamado **`doFilterInternal`**. Este método é onde você coloca a lógica do filtro que será executada uma vez por solicitação.
+A classe OncePerRequestFilter possui um único método abstrato chamado **`doFilterInternal`**. Este método é onde iremos colocar a lógica do filtro que será executada uma vez por solicitação.
 
 O método **`doFilterInternal`** recebe três argumentos:
 
-- HttpServletRequest: A solicitação HTTP recebida.
-- HttpServletResponse: A resposta HTTP que será enviada de volta ao cliente.
-- FilterChain: O objeto que representa a cadeia de filtros restante a ser executada após o filtro atual.
+- **HttpServletRequest**: A solicitação HTTP recebida.
+- **HttpServletResponse**: A resposta HTTP que será enviada de volta ao cliente.
+- **FilterChain**: O objeto que representa a cadeia de filtros restante a ser executada após o filtro atual.
 
 ### Implementação do código:
 
@@ -87,7 +86,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private final UserDetailsService userDetailsService;
   ```
 
-- **`authHeader`** irá receber o valor que estiver no header(cabeçalho) **"Authorization"**, se for nulo ou não começar com **"Bearer "** a solicitação é passada adiante para o próximo filtro sem autenticar o usuário, com o método **`filterChain.doFilter(request, response);`**.
+- **`authHeader`** irá receber o valor do JWT Token que estiver no header(cabeçalho) **"Authorization"**, se for nulo ou não começar com **"Bearer "** a solicitação é passada adiante para o próximo filtro sem autenticar o usuário, com o método **`filterChain.doFilter(request, response);`**.
 
   ```java
   final String authHeader = request.getHeader("Authorization");
@@ -98,7 +97,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   }
   ```
 
-- A variável **`jwtToken`** irá receber o valor do token que irá chegar na requisição, enquanto que a variável **`userEmail`** irá receber o email do usuário que também está no Token, se quisermos ao invés do email poderia ser o username, porém optei por email por ser algo único de cada usuário, mas isso vai depender do sistema e do contexto dele.
+- A variável **`jwtToken`** irá receber o valor do token que irá chegar no cabeçalho da requisição, enquanto que a variável **`userEmail`** irá receber o email do usuário que está no Token (**Não o do banco**), se quisermos ao invés do email poderia ser o username, porém optei por email por ser algo único de cada usuário, mas isso vai depender do sistema e do contexto dele.
 
   ```java
   final String jwtToken;
@@ -118,7 +117,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   }
   ```
 
-- Depois da verificação passamos adiante e será realizado uma consulta no banco de dados buscando o usuário de acordo com seu email(ou username), essa busca retornará um objeto do tipo **`UserDetails`**, que conterá os tipos de dados necessários para o Spring Security executar os processos necessários, essa busca vai ser realizada por um objeto do tipo **`UserDetailsService`**.
+- Depois da verificação passamos adiante e será realizado uma consulta no banco de dados buscando o usuário de acordo com seu email(ou username) do token para verificar se o usuário realmente existe no banco de dados, essa busca retornará um objeto do tipo **`UserDetails`**, que conterá os tipos de dados necessários sobre um usuário para o Spring Security executar os processos necessários, essa busca vai ser realizada por um objeto do tipo **`UserDetailsService`**.
 
   ```java
   if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null){
@@ -137,16 +136,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   }
   ```
 
-- Se o token for válido então criaremos um objeto do tipo **`UsernamePasswordAuthenticationToken`** contendo os detalhes do usuário e suas autoridades. Sua principal função no processo de autenticação é encapsular as informações do usuário, como nome de usuário, autoridades e outros detalhes, para que possam ser manipulados por outros componentes do Spring Security.
-  ```java
-  if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null){
-    UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-    if(jwtService.isTokenValid(jwtToken, userDetails)){
-        UsernamePasswordAuthenticationToken authToken =
-            new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities());
-    }
+- Se o token for válido então criaremos um objeto do tipo **`UsernamePasswordAuthenticationToken`** contendo os detalhes do usuário e suas autoridades. Um objeto **`UsernamePasswordAuthenticationToken`** representa uma tentativa de autenticação bem-sucedida ou em andamento, inclusive um dos métodos na sua classe é **`setAuthenticated`**.
+
+Talvez você se pergunte por mais que o **`UserDetails`** também encapsule os detalhes dos usuários por questões de responsabilidade não é a função do UserDetails representar uma tentativa de autenticação, ele representa apenas os detalhes de um usuário seja lá qual for seu estado(autenticado ou não), mas usamos um UserDetails para criar um UsernamePasswordAuthenticationToken.
+
+```java
+if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null){
+  UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+  if(jwtService.isTokenValid(jwtToken, userDetails)){
+      UsernamePasswordAuthenticationToken authToken =
+          new UsernamePasswordAuthenticationToken(
+                          userDetails,
+                          null,
+                          userDetails.getAuthorities());
   }
-  ```
+}
+```
+
+O argumento **`null`** que dexei ali representa a credentials do usuário, ou seja a senha, porém como estamos utilizando JWT token então não é necessário passar ela.
+
+Quanto ao **`setDetails`**, com ele nós passamos os detalhes da requisição HTTP do cliente.
+
+```java
+authToken.setDetails(new WebAuthenticationDetailsSource()
+                  .buildDetails(request));
+```
